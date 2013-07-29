@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PE40", "PE40.csproj", "{384D5E54-3608-4D7D-9BB6-8314E623D45E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{384D5E54-3608-4D7D-9BB6-8314E623D45E}.Debug|x86.ActiveCfg = Debug|x86
+		{384D5E54-3608-4D7D-9BB6-8314E623D45E}.Debug|x86.Build.0 = Debug|x86
+		{384D5E54-3608-4D7D-9BB6-8314E623D45E}.Release|x86.ActiveCfg = Release|x86
+		{384D5E54-3608-4D7D-9BB6-8314E623D45E}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
