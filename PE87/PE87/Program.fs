@@ -5,18 +5,7 @@
 
 open System;
 
-#if TEST
-let t1 = Math.Pow( 50000000.0, (1.0/3.0))
-
-let test = bigint(2)
-let test2 = bigint(3)
-let test3 = bigint(2)
-#endif
 let primePow (x4, y3, z2) = bigint.Pow( x4,4) + bigint.Pow(y3,3) + bigint.Pow(z2,2)
-
-#if TEST
-let x = primePow( test, test2, test3)
-#endif
 
 let primes max =
   let rec next potentialPrimes =
@@ -25,52 +14,27 @@ let primes max =
    | n :: tail -> n :: next (List.filter (fun x -> x % n <> 0) tail)
   next [ 2 .. max]
 
-#if TEST
-let ps = primes 150
-#endif
-
-let last lst =
-    List.head( List.rev lst)
-
-
-// 50 -> 4
-// 100 -> 9???
-// 50000000 -> ????
-
-
 let MAX = bigint(50000000)
 
 let PRIMES2 = primes( int(Math.Floor(Math.Pow( float(MAX), (1.0/2.0)))))
-let MAX2 = last( PRIMES2 )
 
 let PRIMES3 = primes( int(Math.Floor(Math.Pow( float(MAX), (1.0/3.0)))))
-let MAX3 = last( PRIMES3)
 
 let PRIMES4 = primes( int(Math.Floor(Math.Pow( float(MAX), (1.0/4.0)))))
-let MAX4 = last( PRIMES4)
 
-let tripletPermutations = (List.length(PRIMES2))*(List.length(PRIMES3))*(List.length(PRIMES4))
+//let tripletPermutations = (List.length(PRIMES2))*(List.length(PRIMES3))*(List.length(PRIMES4))
 
-let primePowCount2( p3, p2) =
-    let chk = primePow( bigint(MAX4), p3, p2)
-    if( chk < MAX ) then
-        0
-    else
-        let lambda (x:int) = (if primePow(bigint(x),p3,p2) >= MAX then 1 else 0)
-        List.fold ( fun acc (a4:int) -> (acc) + (lambda a4)) 0 PRIMES4
+let primePowCount4( p3, p2) = 
+    let mapper (x4:int) = primePow(bigint(x4),p3,p2) 
+    Seq.map ( fun (a4:int) -> (mapper a4) ) PRIMES4 |> Seq.filter ( fun x -> x < MAX)
 
-let primePowCount( p2) = 
-    let chk = primePow( bigint(MAX4), bigint(MAX3), p2)
-    if(  chk < MAX ) then
-        0
-    else
-        List.fold ( fun acc (a3:int) -> (acc) + primePowCount2(bigint(a3), p2)) 0 PRIMES3
+let primePowCount3( p2) = 
+    Seq.collect ( fun (a3:int) -> primePowCount4(bigint(a3), p2)) PRIMES3
 
+let primePowCount2 = 
+    Seq.collect ( fun (a2:int) -> primePowCount3(bigint(a2))) PRIMES2
 
-let countOfTripletsThatExceedMax = 
-     List.fold ( fun acc (a2:int) -> (acc) + primePowCount(bigint(a2))) 0 PRIMES2
-
-let ANSWER = tripletPermutations - countOfTripletsThatExceedMax
+let ANSWER = primePowCount2 |> Seq.distinctBy id  |> Seq.length
 printf "%A" ANSWER
 printf "Done\n";
 
