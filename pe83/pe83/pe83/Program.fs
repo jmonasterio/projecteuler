@@ -1,98 +1,116 @@
-﻿open System.IO;
+﻿// NOTES: This is neither efficient nor pretty F# code.
+//  Takes about 5 minutes to run, which is not good.
+// Only interesting thing is that I'm summing up the results as I go along: 
+// I just add shortest routes from the new cuboids for each new M
+
 open System;
 
-(* FROM WIKIPEDIA
+let EPSILON = 0.0001
 
-1. Assign to every node a tentative distance value: set it to zero for our initial node and to infinity for all other nodes.
-2. Mark all nodes unvisited. Set the initial node as current. Create a set of the unvisited nodes called the unvisited set consisting of all the nodes except the initial node.
-3. For the current node, consider all of its unvisited neighbors and calculate their tentative distances. For example, if the current node A is marked with a distance of 6, and the edge connecting it with a neighbor B has length 2, then the distance to B (through A) will be 6+2=8. If this distance is less than the previously recorded distance, then overwrite that distance. Even though a neighbor has been examined, it is not marked as visited at this time, and it remains in the unvisited set.
-4. When we are done considering all of the neighbors of the current node, mark the current node as visited and remove it from the unvisited set. A visited node will never be checked again; its distance recorded now is final and minimal.
-5. If the destination node has been marked visited (when planning a route between two specific nodes) or if the smallest tentative distance among the nodes in the unvisited set is infinity (when planning a complete traversal), then stop. The algorithm has finished.
-6. Set the unvisited node marked with the smallest tentative distance as the next "current node" and go back to step 3.
+let isInteger( x:float) = 
+    x = Math.Floor(x + EPSILON)
 
-*)
+//let t1 = isSquare 81.0
+//let t2 = isSquare 101.0
 
-(* TEST ONLY
-let arrayOfArrays = [| [| 131; 673; 234; 103; 18 |]; 
-                       [| 201; 96; 342; 965; 150 |];
-                       [| 630; 803; 746; 422; 111 |];
-                       [| 537; 699; 497; 121; 956 |];
-                       [| 805; 732; 524; 37; 331 |]; |];
-let MAX_COL = 5;
-let MAX_ROW = 5;
-                       *)
+// Flatten out the cuboid and then draw staight line between corners.
+//let shortest1( a,b,c) =
+//    Math.Sqrt( float(((a+c)*(a+c))+(b*b)))
+let shortest2( a,b,c) =
+    Math.Sqrt( float(((b+c)*(b+c))+(a*a)))
+let shortest3( a,b,c) =
+    Math.Sqrt( float(((b+a)*(b+a))+(c*c)))
 
-//let obtainNums (line:string) =
-//    line.Split(",".ToCharArray()) |> Array.map( Int32.Parse);
+let isShortestAnInteger(a,b,c) =
+    let shortest = Seq.min( [shortest2( a,b,c); shortest3( a,b,c )])
+    isInteger( shortest )
+
+let tup = (5,6,3)
+//let t3 = shortest1(tup)
+let t31 = shortest2(tup)
+let t32 = shortest3(tup)
+let t4 = isShortestAnInteger(tup)
+
+let generateCuboidsDims( m:int) =
+      seq {
+        for h in 1..m do 
+            for w in h..m do 
+                for l in w..m do 
+                    if h<=w && w<=l then yield (h,w,l) }
+
+let generateCuboidsDims2( m:int, oldm:int) =
+      seq {
+        for len in oldm..m do 
+            for w in 1..len do 
+                for h in 1..w do
+                    if (h>oldm || w>oldm || len >oldm) then yield (h,w,len) }
+
+let generateCuboidsDims3( m:int, oldm:int) =
+      seq {
+        for len in oldm..m do 
+            for w in 1..len do 
+                if len<=oldm && w<=oldm then
+                    for h in oldm..w do
+                        yield (h,w,len)
+                else
+                    for h in 1..w do
+                        yield (h,w,len) }
+
+let mutable newCnt = 0
 
 
-// Using Dijkstra's algorithm from wikipedia.
-let matrix = 
-    File.ReadAllLines(@"Matrix.txt") |> Array.map( fun line -> line.Split(",".ToCharArray()) |> Array.map( Int32.Parse));  
-    
-    
+let FIND=1000000
 
-type Coord = {
-    row: int;
-    col: int;
-    }
+for m in Seq.initInfinite( fun index -> 
+    let n = index + 1
+    n)
+    do
+        let generated = generateCuboidsDims2( m, m-1)
+        let found = (Seq.length (Seq.filter isShortestAnInteger generated))
+        let oldCnt = newCnt
+        newCnt <- newCnt + found
+        let ignore = 
+            if( newCnt > FIND) then
+                let stop = 1
+                System.Diagnostics.Debugger.Break()
+                stop
+            else
+                let stop = 0
+                stop
+        Console.WriteLine( "{0}: {1} : {2}", m, newCnt, newCnt-oldCnt)
 
-type Node = {
-    rc : Coord;
-    distance : int;
-    mutable unvisited : bool;
-    mutable tentative_distance : int;
-    }
+let M = 3
+//let data = generateCuboidsDims(M)
+//let dataCnt = Seq.length data
 
-let MAX_ROW = matrix.GetUpperBound(0)+1;
-let MAX_COL = MAX_ROW;
-let MAX_DISTANCE = Int32.MaxValue;
 
-let array = Array2D.init MAX_ROW MAX_COL (fun i j -> { new Node with distance = matrix.[i].[j] and unvisited = true and tentative_distance = MAX_DISTANCE and rc = { row = i; col = j } } ); 
+let filteredCnt m = (Seq.length (Seq.filter isShortestAnInteger (generateCuboidsDims m) ) )
 
-let neighborNodes (c:Node) = [
-    // Down
-    if c.rc.row < MAX_ROW-1 then
-        yield array.[c.rc.row+1,c.rc.col];
-    // Right
-    if c.rc.col < MAX_COL-1 then
-        yield array.[c.rc.row, c.rc.col+1];
-    // Up
-    if c.rc.row > 0 then
-        yield array.[c.rc.row-1,c.rc.col];
-    // Left
-    if c.rc.col > 0 then
-        yield array.[c.rc.row, c.rc.col-1];
+let cnt = filteredCnt M
+Console.WriteLine( "cnt: {0}", cnt)
 
-];
-    
 
-let unvisitedNodes  (arr: Node[,]) = [
-    for ii in 0..(MAX_ROW-1) do
-        for jj in 0..(MAX_COL-1) do
-            if( arr.[ii,jj].unvisited) then
-                yield arr.[ii,jj];
-];
 
-let nodeWithSmallestTentativeDistance (arr:Node[,]) = 
-    unvisitedNodes arr |> List.minBy( fun x -> x.tentative_distance);
 
-let mutable CurrentNode = array.[0,0];
-CurrentNode.tentative_distance <- CurrentNode.distance;
+//let myMatch x a b = x<FIND && a<b
 
-let DestinationNode = array.[MAX_ROW-1, MAX_COL-1];
+//let binarySearch (startx, endx, f, condition) =
+//    let rec iter a b =
+//        if a = b then None
+//        else
+//            let median:int = a + (b - a)/2
+//            let cnt = (f median)
+//            let below = (condition cnt a b)
+//            Console.WriteLine( "{0}:{1}:{2}", median, cnt, below)
+//            match cnt with
+//            | value when a=b  -> Some median
+//            | value when below -> iter (median + 1) b
+//            | _                       -> iter a median
+//    (iter startx endx)
 
-while DestinationNode.unvisited = true do
-    for n in (neighborNodes CurrentNode) do
-        //printf "%A\n" n.rc
-        if n.unvisited then
-            let tentativeDistance = CurrentNode.tentative_distance + n.distance;
-            if tentativeDistance < n.tentative_distance then
-                n.tentative_distance <- tentativeDistance;
-    CurrentNode.unvisited <- false;
- 
-    if DestinationNode.unvisited = true then
-        CurrentNode <- nodeWithSmallestTentativeDistance array;
+//let findM = binarySearch( 500, 1000, filteredCnt, myMatch )
 
-printf "Answer is: %A\n" DestinationNode.tentative_distance ;
+open System.IO;
+
+//printf "Answer is: %A\n" findM
 printf "Done\n";

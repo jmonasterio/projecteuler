@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pe83", "pe83\pe83.fsproj", "{E979156D-B932-4E46-8C65-3F1B8555647D}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "pe86", "..\pe83\pe83\pe83\pe86.fsproj", "{E979156D-B932-4E46-8C65-3F1B8555647D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
